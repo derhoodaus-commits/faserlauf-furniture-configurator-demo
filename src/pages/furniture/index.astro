@@ -1,0 +1,93 @@
+---
+import { absoluteUrl } from '../../lib/paths.ts';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts';
+import { fromPrice } from '../../lib/pricing.ts';
+
+const itemList = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Faserlauf furniture',
+  itemListElement: PRODUCT_IDS.map((id, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    url: absoluteUrl(`/furniture/${id}/`),
+    name: PRODUCTS[id].name,
+  })),
+};
+const cheapest = Math.min(...PRODUCT_IDS.map((id) => fromPrice(id)));
+---
+
+<BaseLayout
+  title="Furniture: tables, bookcases, benches and desks"
+  description="All Faserlauf pieces at a glance: dining table, coffee table, bookcase, bench and desk in solid oak, beech, walnut, pine or ash, made to measure. Demo project."
+  ogImage="/generated/og/furniture.jpg"
+  jsonLd={[itemList]}
+>
+  <header class="page-head">
+    <div class="wrap">
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Furniture' }]} />
+      <p class="eyebrow">Made to measure, from €{Math.round(cheapest / 100).toLocaleString('en-US')}</p>
+      <h1>The furniture</h1>
+      <p class="lead">
+        Five pieces, each one a parametric design. Pick one to read about sizes, woods and options, or open it straight in the 3D
+        configurator.
+      </p>
+    </div>
+  </header>
+
+  <section class="section" aria-label="All pieces">
+    <div class="wrap">
+      <div class="grid grid--3">
+        {PRODUCT_IDS.map((id) => <ProductCard id={id} headingLevel={2} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="common-title">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="common-title">What every piece has in common</h2>
+      </div>
+      <ul class="common">
+        <li>
+          <h3>Solid wood, glued from narrow boards</h3>
+          <p>Tops and panels are made of boards 9–13 cm wide with alternating growth rings, so they stay flat.</p>
+        </li>
+        <li>
+          <h3>Real joints</h3>
+          <p>Mortise and tenon in the bases, housed shelves, dovetailed drawers. Screws only where wood must be allowed to move.</p>
+        </li>
+        <li>
+          <h3>Checked for sag</h3>
+          <p>The configurator calculates how far tops and shelves bend under load and stops combinations we wouldn’t build.</p>
+        </li>
+        <li>
+          <h3>Finish you can repair</h3>
+          <p>Hardwax oil or water-based matte lacquer, both free of solvents. Or raw, if you want to finish it yourself.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .common {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+    gap: 28px;
+  }
+  .common li {
+    border-top: 1.5px solid var(--ink);
+    padding-top: 14px;
+  }
+  .common p {
+    color: var(--ink-2);
+    margin: 0;
+  }
+</style>

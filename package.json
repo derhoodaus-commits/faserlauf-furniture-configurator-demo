@@ -1,0 +1,50 @@
+{
+  "name": "faserlauf-carpentry-configurator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo project: website of a fictional Berlin carpentry workshop with a parametric 3D furniture configurator",
+  "type": "module",
+  "engines": {
+    "node": ">=22.23"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@astrojs/node": "^11.1.13",
+    "@astrojs/react": "^7.1.9",
+    "@astrojs/sitemap": "^3.7.5",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/hanken-grotesk": "^5.3.0",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "astro": "^7.4.12",
+    "jspdf": "^4.2.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.187.0",
+    "pngjs": "^7.0.0",
+    "sharp": "^0.35.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.0"
+  },
+  "scripts": {
+    "dev": "astro dev --port 3002",
+    "build": "astro check && astro build",
+    "start": "npm run build && node server.mjs",
+    "serve": "node server.mjs",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:e2e": "python tests/e2e.py",
+    "generate:textures": "node scripts/generate-textures.ts",
+    "generate:renders": "python scripts/render_previews.py",
+    "build:pages": "astro check && node scripts/build-pages.mjs",
+    "preview:pages": "node scripts/serve-pages.mjs",
+    "test:pages": "node tests/pages-build.mjs"
+  }
+}

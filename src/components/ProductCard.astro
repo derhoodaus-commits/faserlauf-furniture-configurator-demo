@@ -1,0 +1,37 @@
+---
+import { withBase } from '../lib/paths.ts';
+import { PRODUCTS } from '../data/products.ts';
+import { fromPrice, formatEuro } from '../lib/pricing.ts';
+import type { ProductId } from '../lib/types.ts';
+
+interface Props {
+  id: ProductId;
+  headingLevel?: 2 | 3;
+  eager?: boolean;
+}
+const { id, headingLevel = 3, eager = false } = Astro.props;
+const p = PRODUCTS[id];
+const H = headingLevel === 2 ? 'h2' : 'h3';
+---
+
+<article class="product-card">
+  <div class="product-card__img">
+    <img
+      src={withBase(`/generated/renders/${id}-card.webp`)}
+      alt={`${p.name} in the configurator's standard version`}
+      width="800"
+      height="600"
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+    />
+  </div>
+  <div class="product-card__body">
+    <p class="product-card__kind">{p.kind} · {p.model}</p>
+    <H><a href={withBase(`/furniture/${id}/`)}>{p.name}</a></H>
+    <p class="product-card__tagline">{p.tagline}</p>
+    <div class="product-card__foot">
+      <span class="price-from">from {formatEuro(fromPrice(id))}<small>incl. VAT · demo</small></span>
+      <span class="product-card__more" aria-hidden="true">Details →</span>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,268 @@
+---
+import { STATIC_DEMO, withBase } from '../lib/paths.ts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE } from '../data/site.ts';
+
+const topics = [
+  ['general', 'General question'],
+  ['custom', 'A piece that isn’t in the configurator'],
+  ['visit', 'Visit the workshop'],
+  ['existing', 'About an existing order'],
+  ['other', 'Something else'],
+];
+---
+
+<BaseLayout
+  title="Contact and visits"
+  description="Write to or call Faserlauf, the furniture workshop in Berlin-Neukölln, or make an appointment to see the woods. Contact form with quick reply. Demo project."
+  ogImage="/generated/og/contact.jpg"
+>
+  <header class="page-head">
+    <div class="wrap">
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Contact' }]} />
+      <p class="eyebrow">We reply within one working day</p>
+      <h1>Contact</h1>
+      <p class="lead">
+        For a quote, the <a href={withBase('/configurator/')}>configurator</a> is quickest: it sends us the exact design. For everything else,
+        write, call or come by.
+      </p>
+    </div>
+  </header>
+
+  <div class="wrap contact">
+    <section class="contact__form" aria-labelledby="form-title" id="form">
+      <h2 id="form-title">Send a message</h2>
+      <div class="form-errors" id="form-errors" tabindex="-1" role="alert" hidden></div>
+      {/* Static demo build: method="dialog" outside a <dialog> never submits, so nothing can be sent even without JS */}
+      <form
+        class="form"
+        method={STATIC_DEMO ? 'dialog' : 'post'}
+        action={STATIC_DEMO ? undefined : withBase('/api/contact')}
+        novalidate
+        data-contact-form
+      >
+        <div class="field">
+          <label for="c-name">Name</label>
+          <input id="c-name" name="name" type="text" autocomplete="name" required maxlength="100" />
+        </div>
+        <div class="field">
+          <label for="c-email">Email</label>
+          <input id="c-email" name="email" type="email" autocomplete="email" required maxlength="200" />
+        </div>
+        <div class="field">
+          <label for="c-phone">Phone (optional)</label>
+          <input id="c-phone" name="phone" type="tel" autocomplete="tel" maxlength="40" />
+        </div>
+        <div class="field">
+          <label for="c-topic">Topic</label>
+          <select id="c-topic" name="topic">
+            {topics.map(([v, l]) => <option value={v}>{l}</option>)}
+          </select>
+        </div>
+        <div class="field">
+          <label for="c-message">Message</label>
+          <textarea id="c-message" name="message" rows="6" required maxlength="3000"></textarea>
+        </div>
+        <div class="hp" aria-hidden="true">
+          <label for="c-website">Website</label>
+          <input id="c-website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+        <div class="field field--check">
+          <input id="c-consent" name="consent" type="checkbox" required />
+          <label for="c-consent">I agree that Faserlauf uses my details to answer this message (see <a href={withBase('/privacy/')}>privacy</a>).</label>
+        </div>
+        <div>
+          <button class="btn btn--primary" type="submit">Send message</button>
+        </div>
+        {
+          STATIC_DEMO ? (
+            <p class="demo-note">
+              Demo: this static version sends nothing. Your details are only checked in your browser, then you see the confirmation page.
+              <noscript> Checking the form needs JavaScript.</noscript>
+            </p>
+          ) : (
+            <p class="demo-note">Demo: messages are stored on this server only; no email is sent.</p>
+          )
+        }
+      </form>
+    </section>
+
+    <aside class="contact__info" aria-labelledby="visit-title">
+      <h2 id="visit-title">Visit or call</h2>
+      <address>
+        <strong>{SITE.fullName}</strong><br />
+        {SITE.street}, courtyard 2<br />
+        {SITE.postcode} {SITE.city}-{SITE.district}
+      </address>
+      <p>
+        <a href={`tel:${SITE.phoneIntl}`}>{SITE.phone}</a><br />
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </p>
+      <h3>Opening hours</h3>
+      <dl class="hours">
+        {
+          SITE.hours.map(([d, t]) => (
+            <div>
+              <dt>{d}</dt>
+              <dd>{t}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <h3>Getting here</h3>
+      <p>
+        Five minutes on foot from the U7 station Rathaus Neukölln. Parking for loading in the courtyard, bicycles welcome. We don’t embed
+        a map here, so no data goes to a map provider.
+      </p>
+    </aside>
+  </div>
+</BaseLayout>
+
+<script>
+  import { readContact, validateContact, type FieldErrors } from '../lib/inquiry.ts';
+  import { STATIC_DEMO, withBase } from '../lib/paths.ts';
+
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  const box = document.getElementById('form-errors');
+  const labels: Record<string, string> = { name: 'c-name', email: 'c-email', phone: 'c-phone', message: 'c-message', consent: 'c-consent' };
+
+  function show(errors: FieldErrors, extra?: string) {
+    if (!form || !box) return;
+    form.querySelectorAll('.field__error').forEach((e) => e.remove());
+    form.querySelectorAll('[aria-invalid]').forEach((e) => e.removeAttribute('aria-invalid'));
+    const entries = Object.entries(errors);
+    if (!entries.length && !extra) {
+      box.hidden = true;
+      return;
+    }
+    box.replaceChildren();
+    const p = document.createElement('p');
+    p.textContent = extra ?? `Please check ${entries.length === 1 ? 'one field' : `${entries.length} fields`}:`;
+    box.append(p);
+    if (entries.length) {
+      const ul = document.createElement('ul');
+      for (const [k, msg] of entries) {
+        const id = labels[k];
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `#${id}`;
+        a.textContent = msg ?? '';
+        li.append(a);
+        ul.append(li);
+        const input = id ? document.getElementById(id) : null;
+        if (input) {
+          input.setAttribute('aria-invalid', 'true');
+          const span = document.createElement('span');
+          span.className = 'field__error';
+          span.id = `${id}-err`;
+          span.textContent = msg ?? '';
+          input.setAttribute('aria-describedby', span.id);
+          input.closest('.field')?.append(span);
+        }
+      }
+      box.append(ul);
+    }
+    box.hidden = false;
+    box.focus();
+  }
+
+  if (new URLSearchParams(location.search).get('invalid') === '1') {
+    show({}, 'Your message could not be sent: please fill in name, email, a message of at least 10 characters and agree to the privacy note.');
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const raw = Object.fromEntries(fd.entries()) as Record<string, unknown>;
+    raw['consent'] = fd.get('consent') === 'on';
+    const errors = validateContact(readContact(raw), { kind: 'contact' });
+    if (Object.keys(errors).length) return show(errors);
+    if (STATIC_DEMO) {
+      // Static demo (GitHub Pages): no server, nothing is sent anywhere
+      location.assign(withBase('/inquiry-sent/?type=contact'));
+      return;
+    }
+    const btn = form.querySelector<HTMLButtonElement>('button[type=submit]');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+    }
+    try {
+      const res = await fetch(withBase('/api/contact'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ ...raw, topic: fd.get('topic'), website: fd.get('website') }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { ref?: string; errors?: FieldErrors; message?: string };
+      if (res.ok && data.ref) {
+        location.assign(withBase(`/inquiry-sent/?ref=${encodeURIComponent(data.ref)}&type=contact`));
+        return;
+      }
+      show(data.errors ?? {}, data.message);
+    } catch {
+      show({}, 'No connection to the server. Please try again or email us.');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Send message';
+      }
+    }
+  });
+</script>
+
+<style>
+  .contact {
+    display: grid;
+    gap: clamp(36px, 6vw, 72px);
+    padding-block: clamp(32px, 5vw, 56px) var(--section);
+  }
+  @media (min-width: 900px) {
+    .contact {
+      grid-template-columns: 1.3fr 1fr;
+      align-items: start;
+    }
+  }
+  .contact h2 {
+    font-size: var(--step-2);
+  }
+  .contact__form {
+    max-width: 640px;
+    scroll-margin-top: 16px;
+  }
+  .contact__info {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: clamp(20px, 3vw, 28px);
+  }
+  .contact__info address {
+    font-style: normal;
+    margin-bottom: 12px;
+    line-height: 1.7;
+  }
+  .contact__info a {
+    display: inline-block;
+    padding: 6px 0;
+  }
+  .contact__info h3 {
+    margin-top: 22px;
+  }
+  .hours {
+    margin: 0;
+  }
+  .hours div {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .hours dt {
+    font-weight: 650;
+  }
+  .hours dd {
+    margin: 0;
+    color: var(--ink-2);
+  }
+</style>

@@ -1,0 +1,462 @@
+---
+import { withBase } from '../lib/paths.ts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { PRODUCT_IDS } from '../data/products.ts';
+import { SPECIES, SPECIES_IDS } from '../data/species.ts';
+import { GALLERY } from '../data/gallery.ts';
+import { configHref } from '../lib/url-state.ts';
+import { SITE } from '../data/site.ts';
+
+const steps = [
+  { when: 'Today', title: 'Configure online', text: 'Choose the piece, size, wood and finish in 3D. The price updates with every change.' },
+  { when: 'Within 2 working days', title: 'Drawing and fixed quote', text: 'We check your design by hand and send a dimensioned drawing with a fixed price.' },
+  { when: 'Week 1', title: 'Deposit and boards', text: 'With the 30 % deposit we reserve your boards. Come and pick them in the workshop if you like.' },
+  { when: 'Weeks 2–8', title: 'Built by hand', text: 'Glued up, joined, sanded and finished in our Neukölln workshop. You get photos along the way.' },
+  { when: 'Delivery day', title: 'Delivered and set up', text: 'We bring it, assemble it and take the packaging away. In Berlin with our own van.' },
+];
+const examples = GALLERY.slice(0, 3);
+---
+
+<BaseLayout
+  title="Faserlauf – solid wood furniture made to measure in Berlin"
+  description="Design your solid wood dining table, coffee table, bookcase, bench or desk in 3D, see the price live and get a fixed quote. Built by hand in Berlin-Neukölln. Demo project."
+  ogImage="/generated/og/home.jpg"
+>
+  <section class="hero">
+    <div class="wrap hero__grid">
+      <div class="hero__text">
+        <p class="eyebrow">Furniture workshop in Berlin-Neukölln since {SITE.founded}</p>
+        <h1>Solid wood furniture, built to your measurements.</h1>
+        <p class="lead">
+          Design your table, bookcase, bench or desk in 3D: set the size to the centimeter, choose from five woods and three finishes,
+          and see the price with every change. We build it by hand and deliver it across Germany.
+        </p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href={withBase('/configurator/')}>Start configuring</a>
+          <a class="btn btn--ghost" href={withBase('/furniture/')}>See the furniture</a>
+        </div>
+        <ul class="hero__facts">
+          <li><strong>2 days</strong> to a fixed quote</li>
+          <li><strong>4–9 weeks</strong> build time</li>
+          <li><strong>5 solid woods</strong>, no veneer</li>
+        </ul>
+      </div>
+      <figure class="hero__figure">
+        <img
+          src={withBase('/generated/renders/hero.webp')}
+          alt="A 240 cm oak dining table on a trestle base in a bright room, rendered in the Faserlauf configurator"
+          width="1400"
+          height="1050"
+          fetchpriority="high"
+          decoding="async"
+        />
+        <figcaption>
+          <span class="hero__dim" aria-hidden="true"><span>240 cm</span></span>
+          Rendered with our configurator: the Spree table, 240 × 100 cm in oiled oak.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="furniture-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">01 · The furniture</p>
+        <h2 id="furniture-title">Five pieces, endless sizes</h2>
+        <p>Every piece is a parametric design: you set the measurements, we make sure it still stands, carries and lasts.</p>
+      </div>
+      <div class="grid grid--3">
+        {PRODUCT_IDS.map((id) => <ProductCard id={id} />)}
+        <a class="product-card product-card--cta" href={withBase('/configurator/')}>
+          <span class="product-card--cta__inner">
+            <span class="product-card--cta__title">Not sure yet?</span>
+            <span>Open the configurator and switch between all five pieces. Your choice of wood carries over.</span>
+            <span class="product-card__more">Open the configurator →</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="process-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">02 · How it works</p>
+        <h2 id="process-title">From idea to delivery</h2>
+        <p>No showroom pressure and no surprises: the price you see is calculated from the actual parts, and nothing is built before you approve the drawing.</p>
+      </div>
+      <ol class="timeline">
+        {
+          steps.map((s, i) => (
+            <li>
+              <span class="timeline__tick" aria-hidden="true" />
+              <span class="timeline__when">{s.when}</span>
+              <h3>
+                <span class="timeline__n">{i + 1}</span> {s.title}
+              </h3>
+              <p>{s.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p><a href={withBase('/how-it-works/')}>Lead times, delivery rates and how we calculate prices</a></p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="workshop-title">
+    <div class="wrap split">
+      <div>
+        <p class="eyebrow">03 · The workshop</p>
+        <h2 id="workshop-title">A courtyard workshop with four benches</h2>
+        <p>
+          Faserlauf works from a former bicycle-frame factory in a Neukölln courtyard: four carpenters, one apprentice and a lot of
+          clamps. We build furniture the way it was built before flat-pack: solid boards, real joints, finishes you can repair.
+        </p>
+        <p>
+          The name is German for the direction of the grain. Reading it is the first thing we do with every board, and it decides
+          where the board ends up in your piece.
+        </p>
+        <a class="btn btn--ghost" href={withBase('/about/')}>About the workshop</a>
+      </div>
+      <figure class="endgrain">
+        <img src={withBase('/generated/wood/oak-end.webp')} alt="" width="640" height="200" loading="lazy" decoding="async" />
+        <img src={withBase('/generated/wood/walnut-end.webp')} alt="" width="640" height="200" loading="lazy" decoding="async" />
+        <figcaption>End grain of oak and walnut, generated by the same code that colors the 3D configurator.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="wood-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">04 · Wood</p>
+        <h2 id="wood-title">Five woods, three finishes</h2>
+        <p>From friendly, affordable pine to dark American walnut. Each one behaves differently; the configurator knows how.</p>
+      </div>
+      <ul class="woods">
+        {
+          SPECIES_IDS.map((id) => (
+            <li>
+              <a href={withBase(`/wood-and-finishes/#${id}`)}>
+                <img src={withBase(`/generated/wood/${id}-oiled.webp`)} alt="" width="720" height="320" loading="lazy" decoding="async" />
+                <span class="woods__name">{SPECIES[id].name}</span>
+                <span class="woods__tag">{SPECIES[id].tagline}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="examples-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">05 · Examples</p>
+        <h2 id="examples-title">Configurations from the workshop</h2>
+        <p>Instead of reviews: designs we like, each one ready to open and change in the configurator.</p>
+      </div>
+      <div class="grid grid--3">
+        {
+          examples.map((g) => (
+            <figure class="example">
+              <img src={withBase(`/generated/renders/gallery-${g.id}.webp`)} alt={`${g.title}: example configuration`} width="800" height="600" loading="lazy" decoding="async" />
+              <figcaption>
+                <strong>{g.title}</strong>
+                <span>{g.text}</span>
+                <a href={configHref(g.config, g.view)}>Open this design</a>
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+      <p class="more-link"><a href={withBase('/about/#gallery')}>All example configurations</a></p>
+    </div>
+  </section>
+
+  <section class="section section--dark cta-band" aria-labelledby="cta-title">
+    <div class="wrap cta-band__inner">
+      <div>
+        <h2 id="cta-title">Start with a size. We take care of the rest.</h2>
+        <p>The configurator checks every combination for sag and stability, so what you design is what we can build.</p>
+      </div>
+      <a class="btn btn--light" href={withBase('/configurator/')}>Start configuring</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: clamp(28px, 5vw, 64px) clamp(40px, 6vw, 88px);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero__grid {
+    display: grid;
+    gap: clamp(28px, 4vw, 56px);
+    align-items: center;
+  }
+  @media (min-width: 960px) {
+    .hero__grid {
+      grid-template-columns: 0.92fr 1.08fr;
+    }
+  }
+  .hero h1 {
+    max-width: 13ch;
+  }
+  .hero .lead {
+    margin-bottom: 26px;
+  }
+  .hero__facts {
+    list-style: none;
+    padding: 0;
+    margin: 26px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+  .hero__facts strong {
+    color: var(--ink);
+  }
+  .hero__figure {
+    margin: 0;
+  }
+  .hero__figure img {
+    width: 100%;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .hero__figure figcaption {
+    margin-top: 12px;
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+  .hero__dim {
+    display: block;
+    position: relative;
+    height: 14px;
+    margin: 0 8% 10px;
+    border-left: 1.5px solid var(--ink-3);
+    border-right: 1.5px solid var(--ink-3);
+    background: linear-gradient(var(--ink-3), var(--ink-3)) center / 100% 1.5px no-repeat;
+  }
+  .hero__dim span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--paper);
+    padding: 0 10px;
+    font-weight: 700;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .product-card--cta {
+    text-decoration: none;
+    color: var(--ink);
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--line-strong);
+    min-height: 220px;
+  }
+  .product-card--cta__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    height: 100%;
+    padding: 28px;
+  }
+  .product-card--cta__title {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-variation-settings: 'SOFT' 60;
+  }
+  .timeline {
+    list-style: none;
+    margin: 0 0 28px;
+    padding: 0;
+    display: grid;
+    gap: 22px;
+    position: relative;
+  }
+  .timeline li {
+    position: relative;
+    padding-left: 30px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    bottom: 6px;
+    width: 1.5px;
+    background: var(--line-strong);
+  }
+  .timeline__tick {
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 14px;
+    height: 1.5px;
+    background: var(--accent);
+  }
+  .timeline__when {
+    display: block;
+    font-size: var(--step--1);
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+  .timeline h3 {
+    margin-bottom: 6px;
+  }
+  .timeline__n {
+    font-family: var(--font-body);
+    font-size: 0.8em;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .timeline p {
+    color: var(--ink-2);
+    margin: 0;
+    font-size: 0.97rem;
+  }
+  @media (min-width: 900px) {
+    .timeline {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 28px;
+      padding-top: 26px;
+    }
+    .timeline::before {
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: auto;
+      width: auto;
+      height: 1.5px;
+    }
+    .timeline li {
+      padding-left: 0;
+    }
+    .timeline__tick {
+      top: -32px;
+      left: 0;
+      width: 1.5px;
+      height: 14px;
+    }
+  }
+  .split {
+    display: grid;
+    gap: clamp(28px, 5vw, 64px);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .split {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .endgrain {
+    margin: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .endgrain img {
+    width: 100%;
+    border-radius: var(--radius-sm);
+  }
+  .endgrain figcaption {
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+  .woods {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+    gap: 16px;
+  }
+  .woods a {
+    display: grid;
+    gap: 4px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .woods img {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    width: 100%;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    transition: transform 0.25s;
+  }
+  .woods a:hover img {
+    transform: scale(1.02);
+  }
+  .woods__name {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-variation-settings: 'SOFT' 60;
+  }
+  .woods__tag {
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+  .example {
+    margin: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .example img {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    width: 100%;
+  }
+  .example figcaption {
+    display: grid;
+    gap: 6px;
+    padding: 16px 18px 18px;
+  }
+  .example strong {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 560;
+    font-variation-settings: 'SOFT' 60;
+  }
+  .example span {
+    color: var(--ink-2);
+    font-size: 0.97rem;
+  }
+  .example a {
+    font-weight: 650;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .more-link {
+    margin-top: 24px;
+  }
+  .cta-band__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .cta-band h2 {
+    margin-bottom: 8px;
+  }
+  .cta-band p {
+    color: #d9ccbb;
+    margin: 0;
+    max-width: 56ch;
+  }
+</style>

@@ -1,0 +1,34 @@
+---
+import { absoluteUrl, withBase } from '../lib/paths.ts';
+interface Props {
+  items: { label: string; href?: string }[];
+}
+const { items } = Astro.props;
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((it, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: it.label,
+    ...(it.href ? { item: absoluteUrl(it.href) } : {}),
+  })),
+};
+---
+
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <ol>
+    {
+      items.map((it, i) =>
+        it.href && i < items.length - 1 ? (
+          <li>
+            <a href={withBase(it.href)}>{it.label}</a>
+          </li>
+        ) : (
+          <li aria-current="page">{it.label}</li>
+        ),
+      )
+    }
+  </ol>
+</nav>
+<script type="application/ld+json" is:inline set:html={JSON.stringify(ld)} />

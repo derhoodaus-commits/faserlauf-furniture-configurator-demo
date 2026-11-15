@@ -1,0 +1,54 @@
+---
+import { withBase } from '../lib/paths.ts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Page not found"
+  description="This page doesn’t exist. Find the furniture, the configurator or the contact page from here."
+  noindex
+  canonical={false}
+>
+  <section class="section">
+    <div class="wrap nf">
+      <p class="nf__code" aria-hidden="true">404</p>
+      <h1>Lost in the shavings</h1>
+      <p class="lead">This page doesn’t exist, or it moved. Maybe one of these helps:</p>
+      <ul class="nf__links">
+        <li><a href={withBase('/configurator/')}>Open the 3D configurator</a></li>
+        <li><a href={withBase('/furniture/')}>See all furniture</a></li>
+        <li><a href={withBase('/wood-and-finishes/')}>Read about the woods</a></li>
+        <li><a href={withBase('/contact/')}>Contact the workshop</a></li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    max-width: 720px;
+  }
+  .nf__code {
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 100;
+    font-size: clamp(5rem, 18vw, 9rem);
+    line-height: 1;
+    color: var(--paper-3);
+    margin: 0 0 8px;
+    font-weight: 700;
+  }
+  .nf__links {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 0;
+    display: grid;
+    gap: 6px;
+  }
+  .nf__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 650;
+    font-size: 1.05rem;
+  }
+</style>

@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+---
+
+<BaseLayout title="Legal notice (Impressum) – placeholder" description="Placeholder for the legal notice (Impressum) of the fictional Faserlauf workshop. Demo project." noindex>
+  <header class="page-head">
+    <div class="wrap">
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Legal notice' }]} />
+      <h1>Legal notice (Impressum)</h1>
+      <p class="placeholder-note">
+        <strong>Placeholder.</strong> This is a demo project with a fictional company. A real German business must publish a complete
+        legal notice according to § 5 DDG (Digitale-Dienste-Gesetz). The structure below shows what goes where; it is not legal advice.
+      </p>
+    </div>
+  </header>
+  <div class="wrap prose section">
+    <h2>Provider</h2>
+    <p>[Company name and legal form, e.g. sole proprietorship or GmbH]<br />[Street and number]<br />[Postcode and city]</p>
+    <h2>Represented by</h2>
+    <p>[Name of the owner or managing directors]</p>
+    <h2>Contact</h2>
+    <p>Phone: [number]<br />Email: [address]</p>
+    <h2>Register entry</h2>
+    <p>[Commercial register and number, if registered]<br />[Entry in the Handwerksrolle of the Berlin Chamber of Crafts (Handwerkskammer Berlin)]</p>
+    <h2>VAT ID</h2>
+    <p>[VAT identification number according to § 27a UStG]</p>
+    <h2>Professional title and rules</h2>
+    <p>[Professional title “Tischlermeister” or similar, country where it was awarded, applicable rules such as the Handwerksordnung]</p>
+    <h2>Consumer dispute resolution</h2>
+    <p>[Statement whether the business takes part in dispute resolution proceedings before a consumer arbitration board]</p>
+    <h2>Image credits</h2>
+    <p>All images on this site are rendered by the site’s own 3D configurator and texture generator. No third-party photos are used.</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .placeholder-note {
+    background: var(--warn-soft);
+    border-left: 4px solid var(--amber);
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    max-width: 70ch;
+    margin: 0;
+  }
+</style>

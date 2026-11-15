@@ -1,0 +1,51 @@
+---
+import { withBase } from '../lib/paths.ts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ConfiguratorApp from '../configurator/App.tsx';
+---
+
+<BaseLayout
+  title="3D furniture configurator"
+  description="Design a solid wood table, bookcase, bench or desk in 3D: choose size, wood, finish and details, see the price live and request a quote. Demo project."
+  ogImage="/generated/og/configurator.jpg"
+  variant="app"
+>
+  <h1 class="visually-hidden">3D furniture configurator</h1>
+  <ConfiguratorApp client:only="react">
+    <div class="cfg-skeleton" slot="fallback">
+      <div class="cfg-skeleton__stage">
+        <p class="cfg-skeleton__msg">Loading the configurator…</p>
+      </div>
+      <noscript>
+        <p class="cfg-skeleton__noscript">
+          The configurator needs JavaScript. You can still <a href={withBase('/furniture/')}>browse the furniture</a> or
+          <a href={withBase('/contact/')}>send us a message</a> with the size and wood you have in mind.
+        </p>
+      </noscript>
+    </div>
+  </ConfiguratorApp>
+</BaseLayout>
+
+<style is:global>
+  .cfg-skeleton__stage {
+    height: 46svh;
+    min-height: 260px;
+    background: #efe8dc;
+    display: grid;
+    place-items: center;
+    border-bottom: 1px solid var(--line);
+  }
+  .cfg-skeleton__msg {
+    font-weight: 600;
+    color: var(--ink-3);
+  }
+  .cfg-skeleton__noscript {
+    padding: 20px var(--gutter);
+    max-width: 60ch;
+  }
+  @media (min-width: 980px) {
+    .cfg-skeleton__stage {
+      height: calc(100svh - var(--header-h) - 1px);
+    }
+  }
+</style>

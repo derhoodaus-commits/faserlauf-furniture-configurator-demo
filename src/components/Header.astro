@@ -1,0 +1,61 @@
+---
+import { stripBase, withBase } from '../lib/paths.ts';
+import { NAV } from '../data/site.ts';
+import Logo from './Logo.astro';
+const path = stripBase(Astro.url.pathname);
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href={withBase('/')} aria-label="Faserlauf, furniture workshop Berlin: home">
+      <Logo class="brand__mark" />
+      <span>
+        <span class="brand__name">Faserlauf</span>
+        <span class="brand__sub">Furniture workshop · Berlin</span>
+      </span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav" data-menu-btn>
+      <span class="menu-btn__bars" aria-hidden="true"></span>
+      Menu
+    </button>
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <ul>
+        {
+          NAV.map((n) => (
+            <li>
+              <a href={withBase(n.href)} aria-current={isCurrent(n.href) ? 'page' : undefined}>
+                {n.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a class="nav-cta" href={withBase('/configurator/')} aria-current={isCurrent('/configurator/') ? 'page' : undefined}>Configure in 3D</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-menu-btn]');
+  const nav = document.getElementById('site-nav');
+  if (btn && nav) {
+    const set = (open: boolean) => {
+      btn.setAttribute('aria-expanded', String(open));
+      nav.classList.toggle('is-open', open);
+    };
+    btn.addEventListener('click', () => set(btn.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && btn.getAttribute('aria-expanded') === 'true') {
+        set(false);
+        btn.focus();
+      }
+    });
+    document.addEventListener('click', (e) => {
+      const t = e.target as Node;
+      if (btn.getAttribute('aria-expanded') === 'true' && !nav.contains(t) && !btn.contains(t)) set(false);
+    });
+  }
+</script>

@@ -1,0 +1,406 @@
+---
+import { withBase, absoluteUrl } from '../../lib/paths.ts';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { PRODUCTS, PRODUCT_IDS, LEG_STYLES, EDGE_PROFILES } from '../../data/products.ts';
+import { SPECIES } from '../../data/species.ts';
+import { FINISHES, FINISH_IDS } from '../../data/finishes.ts';
+import { GALLERY } from '../../data/gallery.ts';
+import { SITE } from '../../data/site.ts';
+import { fromPrice, maxPrice, formatEuro } from '../../lib/pricing.ts';
+import { configHref } from '../../lib/url-state.ts';
+import { defaultConfig } from '../../lib/config.ts';
+import type { ProductId } from '../../lib/types.ts';
+
+export function getStaticPaths() {
+  return PRODUCT_IDS.map((id) => ({ params: { slug: id } }));
+}
+
+const id = Astro.params.slug as ProductId;
+const p = PRODUCTS[id];
+const low = fromPrice(id);
+const high = maxPrice(id);
+const examples = GALLERY.filter((g) => g.config.product === id);
+const others = PRODUCT_IDS.filter((x) => x !== id);
+const d = defaultConfig(id);
+const configureUrl = withBase(`/configurator/?p=${id}`);
+
+const productLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: p.name,
+  description: p.description[0],
+  image: absoluteUrl(`/generated/renders/${id}-card.webp`),
+  brand: { '@type': 'Brand', name: 'Faserlauf' },
+  category: p.kind,
+  material: p.species.map((s) => SPECIES[s].name).join(', '),
+  url: absoluteUrl(`/furniture/${id}/`),
+  offers: {
+    '@type': 'AggregateOffer',
+    priceCurrency: 'EUR',
+    lowPrice: (low / 100).toFixed(2),
+    highPrice: (high / 100).toFixed(2),
+    availability: 'https://schema.org/MadeToOrder',
+    seller: { '@type': 'Organization', name: SITE.fullName },
+  },
+};
+const dims = [
+  { label: p.labels.length, spec: p.length },
+  { label: p.labels.width, spec: p.width },
+  { label: p.labels.height, spec: p.height },
+];
+---
+
+<BaseLayout
+  title={`${p.name}: ${p.kind.toLowerCase()} made to measure`}
+  description={`${p.name}: ${p.tagline.toLowerCase()}. Solid wood, ${p.length.min}–${p.length.max} cm, five woods, from ${formatEuro(low)} incl. VAT. Configure it in 3D. Demo project.`}
+  ogImage={`/generated/og/${id}.jpg`}
+  jsonLd={[productLd]}
+>
+  <div class="wrap product">
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Furniture', href: '/furniture/' }, { label: p.name }]} />
+    <div class="product__top">
+      <figure class="product__figure">
+        <img src={withBase(`/generated/renders/${id}-card.webp`)} alt={`${p.name}, standard version: ${d.lengthCm} × ${d.widthCm} × ${d.heightCm} cm in ${SPECIES[d.species].name.toLowerCase()}`} width="800" height="600" fetchpriority="high" />
+        <figcaption>Standard version: {d.lengthCm} × {d.widthCm} × {d.heightCm} cm, {SPECIES[d.species].name.toLowerCase()}, {FINISHES[d.finish].short.toLowerCase()}.</figcaption>
+      </figure>
+      <div class="product__intro">
+        <p class="eyebrow">{p.kind} · model {p.model}</p>
+        <h1>{p.name}</h1>
+        <p class="lead">{p.tagline}.</p>
+        <p class="product__price">
+          <span class="product__from">from {formatEuro(low)}</span>
+          <span class="product__price-note">incl. 19 % VAT, without delivery · <span class="badge-demo">Demo price</span></span>
+        </p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href={configureUrl} data-configure>Configure this {p.kind.toLowerCase()}</a>
+          <a class="btn btn--ghost" href={withBase('/contact/')}>Ask a question</a>
+        </div>
+        <p class="product__lead-time">Lead time {p.leadWeeks[0]}–{p.leadWeeks[1]} weeks · delivered across Germany</p>
+      </div>
+    </div>
+
+    <div class="product__body">
+      <section aria-labelledby="about-title">
+        <h2 id="about-title">About the {p.model}</h2>
+        {p.description.map((t) => <p>{t}</p>)}
+        <ul class="ticks">
+          {p.details.map((t) => <li>{t}</li>)}
+        </ul>
+      </section>
+
+      <section aria-labelledby="dims-title">
+        <h2 id="dims-title">Dimensions</h2>
+        <div class="table-scroll">
+          <table class="data-table">
+            <caption class="visually-hidden">Available dimensions of the {p.name}</caption>
+            <thead>
+              <tr>
+                <th scope="col">Dimension</th>
+                <th scope="col">Range</th>
+                <th scope="col" class="num">Standard</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                dims.map((x) => (
+                  <tr>
+                    <th scope="row">{x.label}</th>
+                    <td>
+                      {x.spec.min}–{x.spec.max} cm, to the centimeter
+                    </td>
+                    <td class="num">{x.spec.default} cm</td>
+                  </tr>
+                ))
+              }
+              <tr>
+                <th scope="row">{p.labels.thickness}</th>
+                <td>{p.thicknesses.join(', ')} mm</td>
+                <td class="num">{p.defaultThickness} mm</td>
+              </tr>
+              {
+                p.shelves ? (
+                  <tr>
+                    <th scope="row">{p.shelves.label}</th>
+                    <td>{p.shelves.max === 1 ? 'Optional' : `${p.shelves.min}–${p.shelves.max}`}</td>
+                    <td class="num">{p.shelves.max === 1 ? (p.shelves.default ? 'Yes' : 'No') : p.shelves.default}</td>
+                  </tr>
+                ) : null
+              }
+              {
+                p.drawers ? (
+                  <tr>
+                    <th scope="row">Drawers</th>
+                    <td>
+                      {p.drawers.min}–{p.drawers.max}
+                    </td>
+                    <td class="num">{p.drawers.default}</td>
+                  </tr>
+                ) : null
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="options-title">
+        <h2 id="options-title">Base and edge</h2>
+        <dl class="options">
+          {
+            p.legs.map((l) => (
+              <div>
+                <dt>{LEG_STYLES[l].name}</dt>
+                <dd>{LEG_STYLES[l].description}</dd>
+              </div>
+            ))
+          }
+          {
+            p.edges.map((e) => (
+              <div>
+                <dt>{EDGE_PROFILES[e].name} edge</dt>
+                <dd>{EDGE_PROFILES[e].description}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+
+      <section aria-labelledby="woods-title">
+        <h2 id="woods-title">Woods and finishes</h2>
+        <ul class="wood-chips">
+          {
+            p.species.map((s) => (
+              <li>
+                <a href={withBase(`/wood-and-finishes/#${s}`)}>
+                  <img src={withBase(`/generated/wood/${s}-chip.webp`)} alt="" width="48" height="48" loading="lazy" />
+                  <span>
+                    <strong>{SPECIES[s].name}</strong>
+                    <span>{SPECIES[s].tagline}</span>
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <p>Finishes: {FINISH_IDS.map((f) => FINISHES[f].name.toLowerCase()).join(', ')}. <a href={withBase('/wood-and-finishes/')}>Compare the woods and finishes</a></p>
+      </section>
+    </div>
+
+    {
+      examples.length ? (
+        <section class="product__examples" aria-labelledby="examples-title">
+          <h2 id="examples-title">Example configurations</h2>
+          <div class="grid grid--2">
+            {examples.map((g) => (
+              <figure class="example">
+                <img src={withBase(`/generated/renders/gallery-${g.id}.webp`)} alt={`${g.title}: example configuration`} width="800" height="600" loading="lazy" />
+                <figcaption>
+                  <strong>{g.title}</strong>
+                  <span>{g.text}</span>
+                  <a href={configHref(g.config, g.view)}>Open this design in the configurator</a>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      ) : null
+    }
+
+    <section class="product__others" aria-labelledby="others-title">
+      <h2 id="others-title">More from the workshop</h2>
+      <ul>
+        {
+          others.map((o) => (
+            <li>
+              <a href={withBase(`/furniture/${o}/`)}>{PRODUCTS[o].name}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .product {
+    padding-block: clamp(20px, 3vw, 36px) var(--section);
+  }
+  .product__top {
+    display: grid;
+    gap: clamp(24px, 4vw, 56px);
+    align-items: center;
+    padding-bottom: clamp(32px, 5vw, 64px);
+    border-bottom: 1px solid var(--line);
+  }
+  @media (min-width: 900px) {
+    .product__top {
+      grid-template-columns: 1.1fr 0.9fr;
+    }
+  }
+  .product__figure {
+    margin: 0;
+  }
+  .product__figure img {
+    width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: #efe8dc;
+  }
+  .product__figure figcaption {
+    margin-top: 10px;
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+  .product__price {
+    display: grid;
+    gap: 2px;
+    margin: 6px 0 22px;
+  }
+  .product__from {
+    font-size: var(--step-2);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .product__price-note {
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+  .product__lead-time {
+    margin-top: 16px;
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+  .product__body {
+    display: grid;
+    gap: clamp(32px, 5vw, 56px);
+    padding-top: clamp(32px, 5vw, 56px);
+  }
+  @media (min-width: 900px) {
+    .product__body {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .product__body h2,
+  .product__examples h2,
+  .product__others h2 {
+    font-size: var(--step-2);
+  }
+  .ticks {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .ticks li {
+    padding-left: 26px;
+    position: relative;
+  }
+  .ticks li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 0.62em;
+    width: 12px;
+    height: 7px;
+    border-left: 2px solid var(--moss);
+    border-bottom: 2px solid var(--moss);
+    transform: translateY(-60%) rotate(-45deg);
+  }
+  .options {
+    margin: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .options div {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+  }
+  .options dt {
+    font-weight: 700;
+  }
+  .options dd {
+    margin: 0;
+    color: var(--ink-2);
+  }
+  .wood-chips {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+    display: grid;
+    gap: 8px;
+  }
+  .wood-chips a {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    text-decoration: none;
+    color: var(--ink);
+    min-height: 52px;
+  }
+  .wood-chips img {
+    border-radius: 6px;
+    flex: none;
+  }
+  .wood-chips span {
+    display: grid;
+  }
+  .wood-chips span span {
+    color: var(--ink-3);
+    font-size: var(--step--1);
+  }
+  .product__examples,
+  .product__others {
+    margin-top: clamp(40px, 6vw, 72px);
+  }
+  .example {
+    margin: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .example img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .example figcaption {
+    display: grid;
+    gap: 6px;
+    padding: 16px 18px 18px;
+  }
+  .example strong {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 560;
+  }
+  .example a {
+    font-weight: 650;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .product__others ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .product__others a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .product__others a:hover {
+    background: var(--card);
+  }
+</style>

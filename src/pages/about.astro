@@ -1,0 +1,227 @@
+---
+import { withBase } from '../lib/paths.ts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { GALLERY } from '../data/gallery.ts';
+import { PRODUCTS } from '../data/products.ts';
+import { configHref } from '../lib/url-state.ts';
+import { calculatePrice, formatEuro } from '../lib/pricing.ts';
+import { SITE } from '../data/site.ts';
+
+const facts = [
+  ['2009', 'founded in a Neukölln courtyard'],
+  ['380 m²', 'workshop, wood store and finishing room'],
+  ['4 + 1', 'carpenters and one apprentice'],
+  ['~250', 'pieces a year, each one made to order'],
+];
+---
+
+<BaseLayout
+  title="About the workshop"
+  description="The story of Faserlauf, a small furniture workshop in a Berlin-Neukölln courtyard, how we work, and a gallery of example configurations. Demo project with a fictional company."
+  ogImage="/generated/og/about.jpg"
+>
+  <header class="page-head">
+    <div class="wrap">
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Workshop' }]} />
+      <p class="eyebrow">Hobelhof 7 · Berlin-Neukölln</p>
+      <h1>A workshop that reads the grain</h1>
+      <p class="lead">
+        Faserlauf is the German word for the direction of the wood fibers. It is the first thing a carpenter looks at, and the reason
+        a well-made table stays flat for fifty years.
+      </p>
+    </div>
+  </header>
+
+  <section class="section" aria-labelledby="story-title">
+    <div class="wrap story">
+      <div class="prose">
+        <h2 id="story-title">How it started</h2>
+        <p>
+          The workshop began in 2009 in the back building of a former bicycle-frame factory, with two workbenches, a used jointer and a
+          stack of oak boards bought from a sawmill in the Uckermark. The first commissions were kitchen tables for friends; word got
+          around because the tables didn’t wobble.
+        </p>
+        <p>
+          Today four carpenters and one apprentice work here. We still build mostly tables, benches, bookcases and desks, because
+          those are the pieces people live with every day, and where good joinery shows.
+        </p>
+        <h2>How we work</h2>
+        <ul>
+          <li><strong>Solid wood only</strong>, bought as whole logs sawn into boards and air-dried before the kiln. We know where each board comes from.</li>
+          <li><strong>Joints before screws.</strong> Mortise and tenon, dovetails, housings. Metal only where wood has to be allowed to move.</li>
+          <li><strong>Drawings before sawdust.</strong> Every piece gets a dimensioned drawing that you approve. The configurator is the first draft of that drawing.</li>
+          <li><strong>Finishes you can repair</strong>: hardwax oil and water-based lacquer, no solvent-based coatings.</li>
+          <li><strong>Offcuts stay useful</strong>: they become cutting boards, drawer parts or kindling for the neighbors.</li>
+        </ul>
+        <h2>Why a configurator?</h2>
+        <p>
+          Because the most common question was “what would it cost in walnut, and 20 cm longer?”. The configurator answers it in a
+          second, with the same rules we use in the workshop: it knows how far a shelf sags and which edge needs which thickness. When
+          you send us your design, half of the drawing is already done.
+        </p>
+      </div>
+      <aside class="facts-box" aria-label="The workshop in numbers">
+        <dl>
+          {
+            facts.map(([n, t]) => (
+              <div>
+                <dt>{n}</dt>
+                <dd>{t}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <p class="demo-note">Demo project: the workshop, its history and its numbers are invented.</p>
+        <a class="btn btn--dark btn--block" href={withBase('/contact/')}>Visit the workshop</a>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--alt" id="gallery" aria-labelledby="gallery-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Gallery</p>
+        <h2 id="gallery-title">Example configurations</h2>
+        <p>
+          We don’t publish customer reviews on this demo site. Instead, here are designs we like, rendered with the configurator. Open
+          any of them, change it, and request a quote for your version.
+        </p>
+      </div>
+      <div class="gallery">
+        {
+          GALLERY.map((g) => (
+            <figure class="gallery__item">
+              <img src={withBase(`/generated/renders/gallery-${g.id}.webp`)} alt={`${g.title}: ${PRODUCTS[g.config.product].name} in a room`} width="800" height="600" loading="lazy" decoding="async" />
+              <figcaption>
+                <span class="gallery__kind">{PRODUCTS[g.config.product].kind} · {g.config.lengthCm} × {g.config.widthCm} × {g.config.heightCm} cm</span>
+                <strong>{g.title}</strong>
+                <span>{g.text}</span>
+                <span class="gallery__foot">
+                  <span class="gallery__price">{formatEuro(calculatePrice(g.config).total)} <small>incl. VAT & delivery, demo</small></span>
+                  <a href={configHref(g.config, g.view)}>Open in configurator</a>
+                </span>
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="visit-title">
+    <div class="wrap visit">
+      <h2 id="visit-title">Come and see the wood</h2>
+      <p>
+        Thursdays until 7 pm the showroom corner is open, Saturdays by appointment. Bring your measurements and a photo of the room.
+        {SITE.street}, {SITE.postcode} {SITE.city}-{SITE.district}, courtyard 2, ground floor.
+      </p>
+      <a class="btn btn--primary" href={withBase('/contact/')}>Make an appointment</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .story {
+    display: grid;
+    gap: clamp(32px, 5vw, 64px);
+  }
+  @media (min-width: 960px) {
+    .story {
+      grid-template-columns: 1fr 340px;
+      align-items: start;
+    }
+  }
+  .story h2:first-child {
+    margin-top: 0;
+  }
+  .facts-box {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: sticky;
+    top: 20px;
+  }
+  .facts-box dl {
+    margin: 0 0 16px;
+    display: grid;
+    gap: 14px;
+  }
+  .facts-box dt {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    line-height: 1;
+    color: var(--accent);
+  }
+  .facts-box dd {
+    margin: 4px 0 0;
+    color: var(--ink-2);
+  }
+  .facts-box .demo-note {
+    margin-bottom: 16px;
+  }
+  .gallery {
+    display: grid;
+    gap: clamp(16px, 2.4vw, 28px);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  }
+  .gallery__item {
+    margin: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .gallery__item img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .gallery__item figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px 18px;
+    flex: 1;
+  }
+  .gallery__kind {
+    font-size: var(--step--1);
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+  .gallery__item strong {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 560;
+  }
+  .gallery__foot {
+    margin-top: auto;
+    padding-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px dashed var(--line);
+  }
+  .gallery__price {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .gallery__price small {
+    font-weight: 500;
+    color: var(--ink-3);
+  }
+  .gallery__foot a {
+    font-weight: 650;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .visit {
+    max-width: 760px;
+  }
+</style>

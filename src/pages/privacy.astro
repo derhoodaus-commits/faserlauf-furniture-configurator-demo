@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+---
+
+<BaseLayout title="Privacy policy – placeholder" description="Placeholder for the privacy policy of the fictional Faserlauf workshop, with the facts about what this demo site stores. Demo project." noindex>
+  <header class="page-head">
+    <div class="wrap">
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Privacy policy' }]} />
+      <h1>Privacy policy</h1>
+      <p class="placeholder-note">
+        <strong>Placeholder.</strong> A real business needs a complete privacy policy under the GDPR, reviewed by a lawyer. The facts
+        below describe what this demo site actually does, so they can be the basis of that text.
+      </p>
+    </div>
+  </header>
+  <div class="wrap prose section">
+    <h2>Controller</h2>
+    <p>[Name and address of the business, contact for data protection questions]</p>
+
+    <h2>What this site stores</h2>
+    <ul>
+      <li><strong>No cookies, no tracking, no third-party services.</strong> Fonts and all images are served from this server; no map, video or analytics provider is embedded.</li>
+      <li><strong>Your cookie choice</strong> is stored in your browser’s local storage (key <code>fl-consent-v1</code>), not sent to us.</li>
+      <li><strong>Your configuration</strong> lives in the page address (URL) only. It reaches us only if you send a request.</li>
+      <li><strong>Quote requests</strong> (name, email, optional phone, postcode, message, the configuration and an image of it) and <strong>contact messages</strong> are stored on this server to answer you. [Retention period, e.g. deleted after 6 months if no order follows.]</li>
+      <li><strong>Server logs:</strong> [What the hosting provider logs, e.g. IP address for 7 days for security.]</li>
+    </ul>
+
+    <h2>Legal basis</h2>
+    <p>[Art. 6(1)(b) GDPR for steps prior to a contract at your request; Art. 6(1)(f) for server logs.]</p>
+
+    <h2>Your rights</h2>
+    <p>[Access, rectification, erasure, restriction, data portability, objection, complaint to the Berlin Commissioner for Data Protection and Freedom of Information.]</p>
+
+    <h2>Statistics</h2>
+    <p>
+      The cookie notice offers “Allow statistics”. On this demo site no statistics tool is installed; the choice only exists so a
+      privacy-friendly tool can be added later without changing the notice.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .placeholder-note {
+    background: var(--warn-soft);
+    border-left: 4px solid var(--amber);
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    max-width: 70ch;
+    margin: 0;
+  }
+  code {
+    font-size: 0.92em;
+    background: var(--paper-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+</style>

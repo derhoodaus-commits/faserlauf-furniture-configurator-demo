@@ -1,0 +1,56 @@
+---
+import { withBase } from '../lib/paths.ts';
+// The site sets no cookies and loads no third-party services. The notice explains that and stores the
+// visitor's choice (localStorage); "fl:consent" is the hook a future analytics tool would listen to.
+---
+
+<section class="consent" id="consent" aria-labelledby="consent-title" hidden>
+  <h2 id="consent-title">Cookies? None needed.</h2>
+  <p>
+    This site sets no tracking cookies and loads nothing from other servers. We only remember this choice in your browser.
+    Optional statistics would only be switched on with your consent. <a href={withBase('/privacy/')}>Privacy policy</a>
+  </p>
+  <div class="btn-row">
+    <button type="button" class="btn btn--ghost btn--small" data-consent="necessary">Essential only</button>
+    <button type="button" class="btn btn--ghost btn--small" data-consent="all">Allow statistics</button>
+  </div>
+</section>
+
+<script>
+  const KEY = 'fl-consent-v1';
+  const box = document.getElementById('consent');
+  const read = () => {
+    try {
+      return localStorage.getItem(KEY);
+    } catch {
+      return null;
+    }
+  };
+  const apply = (v: string) => {
+    document.documentElement.dataset.consent = v;
+    window.dispatchEvent(new CustomEvent('fl:consent', { detail: v }));
+  };
+  const current = read();
+  if (current) apply(current);
+  else if (box) box.hidden = false;
+  // Only the buttons in the notice (the <html> element also carries data-consent once a choice is made)
+  box?.querySelectorAll<HTMLButtonElement>('button[data-consent]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const v = b.dataset.consent ?? 'necessary';
+      try {
+        localStorage.setItem(KEY, v);
+      } catch {
+        /* private mode: the choice lasts for this page view */
+      }
+      apply(v);
+      if (box) box.hidden = true;
+    }),
+  );
+  document.querySelectorAll('[data-open-consent]').forEach((b) =>
+    b.addEventListener('click', () => {
+      if (!box) return;
+      box.hidden = false;
+      box.querySelector<HTMLButtonElement>('[data-consent]')?.focus();
+    }),
+  );
+</script>

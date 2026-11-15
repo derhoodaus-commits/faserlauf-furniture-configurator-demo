@@ -1,0 +1,56 @@
+---
+import { STATIC_DEMO, withBase } from '../lib/paths.ts';
+import { SITE } from '../data/site.ts';
+import { PRODUCTS, PRODUCT_IDS } from '../data/products.ts';
+---
+
+<footer class="site-footer">
+  <div class="site-footer__strip" aria-hidden="true"></div>
+  <div class="wrap site-footer__grid">
+    <div>
+      <p class="footer-brand">Faserlauf</p>
+      <address>
+        {SITE.fullName}<br />
+        {SITE.street}, {SITE.postcode} {SITE.city}-{SITE.district}<br />
+        <a href={`tel:${SITE.phoneIntl}`}>{SITE.phone}</a> · <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </address>
+    </div>
+    <div>
+      <h2>Furniture</h2>
+      <ul>
+        {
+          PRODUCT_IDS.map((id) => (
+            <li>
+              <a href={withBase(`/furniture/${id}/`)}>{PRODUCTS[id].name}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div>
+      <h2>Workshop</h2>
+      <ul>
+        <li><a href={withBase('/configurator/')}>3D configurator</a></li>
+        <li><a href={withBase('/wood-and-finishes/')}>Wood &amp; finishes</a></li>
+        <li><a href={withBase('/how-it-works/')}>How it works &amp; prices</a></li>
+        <li><a href={withBase('/about/')}>About the workshop</a></li>
+        <li><a href={withBase('/faq/')}>FAQ</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Service</h2>
+      <ul>
+        <li><a href={withBase('/contact/')}>Contact</a></li>
+        <li><a href={withBase('/legal-notice/')}>Legal notice (Impressum)</a></li>
+        <li><a href={withBase('/privacy/')}>Privacy policy</a></li>
+        <li><button type="button" class="footer-link" data-open-consent>Cookie settings</button></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap site-footer__bottom">
+    <p><span class="demo-flag">Demo project.</span> Faserlauf is a fictional company; all prices and details are invented.{
+        STATIC_DEMO ? ' This static version sends no form data: nothing you type leaves your browser.' : ''
+      }</p>
+    <p>Images: rendered with this site’s own 3D configurator and wood generator.</p>
+  </div>
+</footer>

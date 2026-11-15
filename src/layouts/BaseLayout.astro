@@ -1,0 +1,74 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CookieNotice from '../components/CookieNotice.astro';
+import { SITE } from '../data/site.ts';
+import { absoluteUrl, stripBase, withBase } from '../lib/paths.ts';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Open Graph image: site path (1200×630) under /generated/og/. */
+  ogImage?: string;
+  noindex?: boolean;
+  /** false for pages without a URL of their own (the 404 page is served for any missing path). */
+  canonical?: boolean;
+  jsonLd?: Record<string, unknown>[];
+  /** Hide the footer's top margin etc. for the full-height configurator page. */
+  variant?: 'default' | 'app';
+}
+
+const { title, description, ogImage = '/generated/og/home.jpg', noindex = false, canonical: hasCanonical = true, jsonLd = [], variant = 'default' } = Astro.props;
+const sitePath = stripBase(Astro.url.pathname);
+const canonical = absoluteUrl(sitePath);
+const fullTitle = title.includes('Faserlauf') ? title : `${title} | Faserlauf`;
+const ogUrl = absoluteUrl(ogImage);
+const orgLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FurnitureStore',
+  name: SITE.fullName,
+  description: 'Demo project: fictional carpentry workshop in Berlin.',
+  url: SITE.url,
+  email: SITE.email,
+  telephone: SITE.phoneIntl,
+  address: { '@type': 'PostalAddress', streetAddress: SITE.street, postalCode: SITE.postcode, addressLocality: SITE.city, addressCountry: 'DE' },
+  priceRange: '€€–€€€',
+};
+const ld = sitePath === '/' ? [orgLd, ...jsonLd] : jsonLd;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {hasCanonical ? <link rel="canonical" href={canonical} /> : null}
+    {noindex ? <meta name="robots" content="noindex, follow" /> : null}
+    <meta name="theme-color" content="#f4eee4" />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Faserlauf (demo project)" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {hasCanonical ? <meta property="og:url" content={canonical} /> : null}
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    {ld.map((d) => <script type="application/ld+json" is:inline set:html={JSON.stringify(d)} />)}
+    <link rel="sitemap" href={withBase('/sitemap-index.xml')} />
+  </head>
+  <body class={variant === 'app' ? 'is-app' : undefined}>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <CookieNotice />
+  </body>
+</html>

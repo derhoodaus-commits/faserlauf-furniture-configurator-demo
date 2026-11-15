@@ -1,0 +1,11 @@
+Generated 2026-11-15T14:10:52.958Z with Node v26.13.0
+oak: 1440×640 swatch 315 ms
+oak: 2048×1024 configurator texture (desktop) 723 ms
+beech: 1440×640 swatch 331 ms
+beech: 2048×1024 configurator texture (desktop) 698 ms
+walnut: 1440×640 swatch 306 ms
+walnut: 2048×1024 configurator texture (desktop) 699 ms
+pine: 1440×640 swatch 290 ms
+pine: 2048×1024 configurator texture (desktop) 793 ms
+ash: 1440×640 swatch 332 ms
+ash: 2048×1024 configurator texture (desktop) 746 ms

@@ -1,0 +1,38 @@
+---
+// Utility page, server build only (injected by astro.config.mjs; noindex, not linked, excluded from the sitemap
+// and robots.txt): renders a configuration without any UI so scripts/render_previews.py can capture the site's
+// preview images.
+import RenderStage from '../configurator/RenderStage.tsx';
+import '../styles/global.css';
+import { withBase } from '../lib/paths.ts';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Render | Faserlauf</title>
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+  </head>
+  <body>
+    <main>
+      <h1 class="visually-hidden">Preview render</h1>
+      <RenderStage client:only="react" />
+    </main>
+    <style is:global>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #efe8dc;
+      }
+      .render-stage {
+        position: fixed;
+        inset: 0;
+      }
+    </style>
+  </body>
+</html>

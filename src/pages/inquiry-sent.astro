@@ -1,0 +1,126 @@
+---
+import { STATIC_DEMO, withBase } from '../lib/paths.ts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Thank you: request received"
+  description="Confirmation of your quote request or message to Faserlauf."
+  noindex
+>
+  <section class="section">
+    <div class="wrap sent">
+      <p class="eyebrow">{STATIC_DEMO ? 'Demo: nothing was sent' : 'Request received'}</p>
+      <h1 data-title>Thank you!</h1>
+      {
+        STATIC_DEMO ? (
+          <p class="lead" data-lead>
+            Your details passed all checks. In a real workshop, we would now get back to you within two working days. This is a
+            static demo, so nothing was sent and nothing was stored.
+          </p>
+        ) : (
+          <p class="lead" data-lead>We have received your request and will get back to you within two working days.</p>
+        )
+      }
+      <p class="sent__ref" data-ref-box hidden>Your reference: <strong data-ref></strong>. Please mention it if you call us.</p>
+      <h2>{STATIC_DEMO ? 'What would happen next' : 'What happens next'}</h2>
+      <ol class="sent__steps" data-quote-steps>
+        <li>A carpenter checks your configuration: proportions, joints, how the boards will run.</li>
+        <li>You receive a dimensioned drawing and a fixed quote by email, usually within two working days.</li>
+        <li>Nothing is binding until you confirm the drawing and pay the deposit.</li>
+      </ol>
+      {
+        STATIC_DEMO ? (
+          <p class="demo-note" data-static-demo>
+            Demo project: this static version of the site has no server. Your details never left your browser, no email is sent
+            and no carpenter will call. The PDF quote and a snapshot of your design can still be downloaded in the configurator.
+          </p>
+        ) : (
+          <p class="demo-note">Demo project: no email is sent and no carpenter will call. The request is stored on this server only.</p>
+        )
+      }
+      <div class="btn-row">
+        <a class="btn btn--primary" href={withBase('/configurator/')} data-back-link>Back to the configurator</a>
+        <a class="btn btn--ghost" href={withBase('/')}>Home</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { REF_PATTERN } from '../lib/inquiry.ts';
+  import { STATIC_DEMO } from '../lib/paths.ts';
+  const q = new URLSearchParams(location.search);
+  const ref = q.get('ref') ?? '';
+  const type = q.get('type');
+  if (REF_PATTERN.test(ref)) {
+    const el = document.querySelector('[data-ref]');
+    const box = document.querySelector<HTMLElement>('[data-ref-box]');
+    if (el && box) {
+      el.textContent = ref;
+      box.hidden = false;
+    }
+  }
+  if (type === 'quote') {
+    // Back to the exact configuration the request was made from (stored by the quote dialog, no personal data)
+    let last: string | null = null;
+    try {
+      last = sessionStorage.getItem('fl-last-configuration');
+    } catch {
+      /* storage blocked */
+    }
+    const back = document.querySelector<HTMLAnchorElement>('[data-back-link]');
+    if (back && last && last.startsWith('?') && last.length < 2000) {
+      back.setAttribute('href', (back.getAttribute('href') ?? '').split('?')[0] + last);
+    }
+  }
+  if (type === 'contact') {
+    const title = document.querySelector('[data-title]');
+    const lead = document.querySelector('[data-lead]');
+    const steps = document.querySelector<HTMLElement>('[data-quote-steps]');
+    if (title) title.textContent = 'Thank you for your message!';
+    if (lead)
+      lead.textContent = STATIC_DEMO
+        ? 'Your message passed all checks. A real workshop would reply the same working day; this is a static demo, so nothing was sent.'
+        : 'We usually reply the same working day, at the latest the next one.';
+    if (steps) {
+      steps.replaceChildren();
+      for (const t of ['We read your message and answer by email (or call you back if you left a number).', 'For a piece that isn’t in the configurator, we may ask for a sketch or a photo of the room.']) {
+        const li = document.createElement('li');
+        li.textContent = t;
+        steps.append(li);
+      }
+    }
+  }
+</script>
+
+<style>
+  .sent {
+    max-width: 760px;
+  }
+  .sent h2 {
+    font-size: var(--step-2);
+    margin-top: 1.4em;
+  }
+  .sent__ref {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--moss);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+  .sent__ref strong {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+  .sent__steps {
+    padding-left: 1.3em;
+    margin-bottom: 24px;
+  }
+  .sent__steps li {
+    margin-bottom: 8px;
+  }
+  .demo-note {
+    margin-bottom: 24px;
+  }
+</style>

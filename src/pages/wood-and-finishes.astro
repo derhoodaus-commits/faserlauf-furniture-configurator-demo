@@ -1,0 +1,294 @@
+---
+import { withBase } from '../lib/paths.ts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SPECIES, SPECIES_IDS } from '../data/species.ts';
+import { FINISHES, FINISH_IDS } from '../data/finishes.ts';
+
+const levels = ['', '€', '€€', '€€€', '€€€€'];
+---
+
+<BaseLayout
+  title="Wood and finishes: oak, beech, walnut, pine, ash"
+  description="Properties, care and best uses of oak, beech, walnut, pine and ash, and how hardwax oil, matte lacquer and raw wood differ. With swatches from our own texture generator. Demo project."
+  ogImage="/generated/og/wood.jpg"
+>
+  <header class="page-head">
+    <div class="wrap">
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Wood & finishes' }]} />
+      <p class="eyebrow">Five woods · three finishes</p>
+      <h1>Wood and finishes</h1>
+      <p class="lead">
+        Which wood suits your piece? The short answer: oak for daily wear, beech for long shelves, walnut for a statement, pine
+        for a friendly budget, ash for a light, crisp look. The long answer is below.
+      </p>
+    </div>
+  </header>
+
+  <nav class="wrap jump" aria-label="Woods on this page">
+    <ul>
+      {SPECIES_IDS.map((id) => <li><a href={`#${id}`}>{SPECIES[id].name}</a></li>)}
+      <li><a href="#finishes">Finishes</a></li>
+    </ul>
+  </nav>
+
+  {
+    SPECIES_IDS.map((id, i) => {
+      const s = SPECIES[id];
+      return (
+        <section class={`section species${i % 2 ? ' section--alt' : ''}`} id={id} aria-labelledby={`${id}-title`}>
+          <div class="wrap species__grid">
+            <div class="species__media">
+              <figure>
+                <img src={withBase(`/generated/wood/${id}-oiled.webp`)} alt={`${s.name}, oiled: typical long grain (generated texture)`} width="720" height="320" loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+                <figcaption>Oiled</figcaption>
+              </figure>
+              <div class="species__pair">
+                <figure>
+                  <img src={withBase(`/generated/wood/${id}-raw.webp`)} alt={`${s.name}, raw`} width="720" height="320" loading="lazy" decoding="async" />
+                  <figcaption>Raw</figcaption>
+                </figure>
+                <figure>
+                  <img src={withBase(`/generated/wood/${id}-end.webp`)} alt={`${s.name}, end grain of glued boards`} width="640" height="200" loading="lazy" decoding="async" />
+                  <figcaption>End grain</figcaption>
+                </figure>
+              </div>
+            </div>
+            <div class="species__text">
+              <p class="eyebrow">{s.latin}</p>
+              <h2 id={`${id}-title`}>{s.name}</h2>
+              <p class="species__tagline">{s.tagline}</p>
+              <p>{s.description}</p>
+              <dl class="facts">
+                <div>
+                  <dt>Color</dt>
+                  <dd>{s.color}</dd>
+                </div>
+                <div>
+                  <dt>Density</dt>
+                  <dd>about {s.densityKgM3} kg/m³</dd>
+                </div>
+                <div>
+                  <dt>Stiffness</dt>
+                  <dd>about {s.stiffnessGPa} GPa (bending)</dd>
+                </div>
+                <div>
+                  <dt>Hardness</dt>
+                  <dd>
+                    <span class="meter" aria-hidden="true">
+                      {[1, 2, 3, 4, 5].map((n) => <span class={n <= s.hardness ? 'on' : ''} />)}
+                    </span>
+                    {s.hardness} of 5
+                  </dd>
+                </div>
+                <div>
+                  <dt>Price level</dt>
+                  <dd>
+                    <span aria-hidden="true">{levels[s.priceLevel]}</span>
+                    <span class="visually-hidden">{s.priceLevel} of 4</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Best for</dt>
+                  <dd>{s.bestFor}</dd>
+                </div>
+                <div>
+                  <dt>Care</dt>
+                  <dd>{s.care}</dd>
+                </div>
+              </dl>
+              <p class="species__note">{s.notes}</p>
+              <a class="btn btn--ghost btn--small" href={withBase(`/configurator/?p=dining-table&wood=${id}`)}>Try {s.name.toLowerCase()} in the configurator</a>
+            </div>
+          </div>
+        </section>
+      );
+    })
+  }
+
+  <section class="section section--dark" id="finishes" aria-labelledby="finishes-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow eyebrow--light">Surface</p>
+        <h2 id="finishes-title">Three finishes</h2>
+        <p>Shown on the same oak board. All our finishes are water-based or solvent-free and safe for children’s rooms once cured.</p>
+      </div>
+      <div class="finishes">
+        {
+          FINISH_IDS.map((f) => (
+            <article class="finish">
+              <img src={withBase(`/generated/wood/oak-${f}.webp`)} alt={`Oak with ${FINISHES[f].name.toLowerCase()}`} width="720" height="320" loading="lazy" decoding="async" />
+              <h3>{FINISHES[f].name}</h3>
+              <p>{FINISHES[f].description}</p>
+              <dl>
+                <dt>Good</dt>
+                <dd>{FINISHES[f].pros}</dd>
+                <dt>Keep in mind</dt>
+                <dd>{FINISHES[f].cons}</dd>
+                <dt>Care</dt>
+                <dd>{FINISHES[f].care}</dd>
+                <dt>Price</dt>
+                <dd>{FINISHES[f].pricePerM2 ? `€${FINISHES[f].pricePerM2} net per m² of surface (demo)` : 'Included'}</dd>
+              </dl>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="images-title">
+    <div class="wrap prose">
+      <h2 id="images-title">About the images on this page</h2>
+      <p>
+        There are no photos here, on purpose. Every swatch is generated by the same small program that colors the 3D configurator:
+        it models growth rings, the darker latewood of each year, pores, the medullary rays that give oak its silvery flecks, knots in
+        pine and the way flat-sawn and quarter-sawn boards show the rings differently. So what you see in the configurator is
+        consistent with what you see here.
+      </p>
+      <p>
+        Real boards vary more than any generator. If the figure matters to you, come to the workshop and choose your boards with us.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .jump {
+    padding-block: 14px;
+  }
+  .jump ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+  }
+  .jump a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .jump a:hover {
+    background: var(--card);
+  }
+  .species {
+    scroll-margin-top: 12px;
+  }
+  .species__grid {
+    display: grid;
+    gap: clamp(24px, 4vw, 56px);
+  }
+  @media (min-width: 900px) {
+    .species__grid {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+  }
+  .species__media {
+    display: grid;
+    gap: 12px;
+  }
+  .species__media figure {
+    margin: 0;
+  }
+  .species__media img {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    aspect-ratio: 9 / 4;
+    object-fit: cover;
+  }
+  .species__pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .species__pair img {
+    aspect-ratio: 16 / 9;
+  }
+  .species__media figcaption {
+    font-size: var(--step--1);
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+  .species__tagline {
+    font-size: var(--step-1);
+    color: var(--ink-2);
+  }
+  .facts {
+    margin: 0 0 16px;
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+  .facts div {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .facts dt {
+    color: var(--ink-3);
+    font-size: 0.95rem;
+  }
+  .facts dd {
+    margin: 0;
+  }
+  .meter {
+    display: inline-flex;
+    gap: 3px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .meter span {
+    width: 14px;
+    height: 6px;
+    border-radius: 2px;
+    background: var(--line);
+  }
+  .meter span.on {
+    background: var(--accent);
+  }
+  .species__note {
+    font-size: 0.95rem;
+    color: var(--ink-2);
+    border-left: 3px solid var(--amber);
+    padding-left: 12px;
+  }
+  .finishes {
+    display: grid;
+    gap: 28px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  }
+  .finish img {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    aspect-ratio: 9 / 4;
+    object-fit: cover;
+    margin-bottom: 14px;
+  }
+  .finish p {
+    color: #d9ccbb;
+  }
+  .finish dl {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  .finish dt {
+    font-weight: 700;
+    color: #fff8ee;
+    margin-top: 8px;
+  }
+  .finish dd {
+    margin: 0;
+    color: #d9ccbb;
+  }
+</style>

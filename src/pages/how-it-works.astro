@@ -1,0 +1,297 @@
+---
+import { withBase } from '../lib/paths.ts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { PRODUCTS, PRODUCT_IDS, DELIVERY, TWO_PERSON_SURCHARGE, TWO_PERSON_KG, TWO_PERSON_LENGTH_CM } from '../data/products.ts';
+import { SPECIES, SPECIES_IDS } from '../data/species.ts';
+import { FINISHES, FINISH_IDS } from '../data/finishes.ts';
+import { calculatePrice, formatEuro, fromPrice, HOURLY_RATE, YIELD_FACTOR } from '../lib/pricing.ts';
+import { defaultConfig } from '../lib/config.ts';
+import { describeConfig } from '../lib/describe.ts';
+import type { DeliveryId } from '../lib/types.ts';
+
+const example = defaultConfig('dining-table');
+const price = calculatePrice(example);
+const steps = [
+  {
+    title: 'Configure and request',
+    text: 'Design the piece in the 3D configurator and send it with “Request a quote”. Your request contains the configuration, an image and the calculated price. Prefer to talk? Call or visit the workshop.',
+  },
+  {
+    title: 'Drawing and fixed quote (within 2 working days)',
+    text: 'A carpenter checks your design: proportions, joints, how the boards will run. You get a dimensioned drawing and a fixed price. If we recommend changes, we explain why.',
+  },
+  {
+    title: 'Order and deposit',
+    text: 'You confirm the drawing and pay a 30 % deposit by bank transfer. We reserve the boards. If you like, choose them with us in the workshop.',
+  },
+  {
+    title: 'Build',
+    text: 'Glue-up, joinery, sanding, finish. Oiled pieces cure for a week before delivery. We send photos of the important steps.',
+  },
+  {
+    title: 'Delivery, assembly, final payment',
+    text: 'We deliver, assemble and level the piece, take the packaging away, and you pay the balance. Care instructions and a small bottle of the finish are included.',
+  },
+];
+const deliveries = Object.keys(DELIVERY) as DeliveryId[];
+---
+
+<BaseLayout
+  title="How it works: ordering, lead times, delivery and prices"
+  description="How ordering made-to-measure furniture from Faserlauf works: from configuration to fixed quote, lead times per piece, delivery flat rates within Germany and how prices are calculated. Demo figures."
+  ogImage="/generated/og/how-it-works.jpg"
+>
+  <header class="page-head">
+    <div class="wrap">
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'How it works' }]} />
+      <p class="eyebrow">Ordering · lead times · prices</p>
+      <h1>How it works and what it costs</h1>
+      <p class="lead">Five steps from your idea to a finished piece in your home, with prices you can follow line by line.</p>
+      <p class="demo-banner"><span class="badge-demo">Demo</span> All prices, rates and lead times on this page are invented for a fictional workshop.</p>
+    </div>
+  </header>
+
+  <section class="section" aria-labelledby="steps-title">
+    <div class="wrap">
+      <h2 id="steps-title" class="visually-hidden">The five steps</h2>
+      <ol class="steps-list">
+        {
+          steps.map((s, i) => (
+            <li>
+              <span class="steps-list__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h3>{s.title}</h3>
+                <p>{s.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="lead-title">
+    <div class="wrap two-col">
+      <div>
+        <h2 id="lead-title">Lead times</h2>
+        <p>Counted from your deposit. In December and before summer holidays it can take one or two weeks longer.</p>
+        <div class="table-scroll">
+          <table class="data-table">
+            <caption class="visually-hidden">Lead time and starting price per piece</caption>
+            <thead>
+              <tr><th scope="col">Piece</th><th scope="col">Lead time</th><th scope="col" class="num">From</th></tr>
+            </thead>
+            <tbody>
+              {
+                PRODUCT_IDS.map((id) => (
+                  <tr>
+                    <th scope="row"><a href={withBase(`/furniture/${id}/`)}>{PRODUCTS[id].name}</a></th>
+                    <td>{PRODUCTS[id].leadWeeks[0]}–{PRODUCTS[id].leadWeeks[1]} weeks</td>
+                    <td class="num">{formatEuro(fromPrice(id))}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h2 id="delivery-title">Delivery</h2>
+        <p>We deliver within Germany only. Prices are net plus 19 % VAT and include setting up the piece.</p>
+        <div class="table-scroll">
+          <table class="data-table">
+            <caption class="visually-hidden">Delivery flat rates</caption>
+            <thead>
+              <tr><th scope="col">Option</th><th scope="col">What’s included</th><th scope="col" class="num">Net</th></tr>
+            </thead>
+            <tbody>
+              {
+                deliveries.map((d) => (
+                  <tr>
+                    <th scope="row">{DELIVERY[d].name}</th>
+                    <td>{DELIVERY[d].description}</td>
+                    <td class="num">{DELIVERY[d].priceNet ? `€${DELIVERY[d].priceNet}` : 'free'}</td>
+                  </tr>
+                ))
+              }
+              <tr>
+                <th scope="row">Two-person carry</th>
+                <td>For pieces over {TWO_PERSON_KG} kg or longer than {(TWO_PERSON_LENGTH_CM / 100).toFixed(2)} m</td>
+                <td class="num">+€{TWO_PERSON_SURCHARGE}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="price-title">
+    <div class="wrap two-col">
+      <div>
+        <h2 id="price-title">How we calculate prices</h2>
+        <p>The configurator builds every piece from its actual parts. The same parts list goes into the price, the cut list in the PDF and the 3D model.</p>
+        <dl class="calc">
+          <div>
+            <dt>Material</dt>
+            <dd>Volume of all parts × {YIELD_FACTOR} (offcuts, knots we cut out, planing allowance) × price per m³ of the wood.</dd>
+          </div>
+          <div>
+            <dt>Workshop time</dt>
+            <dd>€{HOURLY_RATE} net per hour. Hours depend on the piece, the number of parts and joints, the surface to sand, the base, the edge profile and the wood (oak and beech are harder to work than pine).</dd>
+          </div>
+          <div>
+            <dt>Finish</dt>
+            <dd>Per m² of finished surface: {FINISH_IDS.map((f) => `${FINISHES[f].short.toLowerCase()} €${FINISHES[f].pricePerM2}`).join(', ')}.</dd>
+          </div>
+          <div>
+            <dt>Delivery and VAT</dt>
+            <dd>Flat rate as above, then 19 % German VAT on the total.</dd>
+          </div>
+        </dl>
+        <h3>Wood prices per m³ (net, demo)</h3>
+        <ul class="wood-prices">
+          {SPECIES_IDS.map((s) => <li><span>{SPECIES[s].name}</span><span class="num">€{SPECIES[s].pricePerM3.toLocaleString('en-US')}</span></li>)}
+        </ul>
+      </div>
+      <div class="example-calc">
+        <h3>Example: the standard Spree table</h3>
+        <p class="example-calc__what">{describeConfig(example)}</p>
+        <table class="data-table">
+          <caption class="visually-hidden">Example price calculation</caption>
+          <tbody>
+            {
+              price.lines.map((l) => (
+                <tr>
+                  <th scope="row">
+                    {l.label}
+                    <span class="small">{l.detail}</span>
+                  </th>
+                  <td class="num">{formatEuro(l.net, true)}</td>
+                </tr>
+              ))
+            }
+            <tr><th scope="row">Net</th><td class="num">{formatEuro(price.net, true)}</td></tr>
+            <tr><th scope="row">VAT 19 %</th><td class="num">{formatEuro(price.vat, true)}</td></tr>
+            <tr class="total"><th scope="row">Total</th><td class="num">{formatEuro(price.total, true)}</td></tr>
+          </tbody>
+        </table>
+        <a class="btn btn--primary" href={withBase('/configurator/?p=dining-table')}>Change it in the configurator</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="terms-title">
+    <div class="wrap prose">
+      <h2 id="terms-title">Payment, warranty, changes</h2>
+      <ul>
+        <li><strong>Payment:</strong> 30 % deposit with the order, balance on delivery, by bank transfer. Nothing is paid online.</li>
+        <li><strong>Changes:</strong> free until we cut the boards (usually the first week); after that only if the piece allows it.</li>
+        <li><strong>Warranty:</strong> the statutory two years. On top, we re-tighten, re-level and re-oil within the first year for free in Berlin.</li>
+        <li><strong>Withdrawal:</strong> made-to-measure furniture is excluded from the 14-day right of withdrawal; that is why nothing is built before you approve the drawing.</li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .demo-banner {
+    margin: 18px 0 0;
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+  .steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0;
+    max-width: 880px;
+  }
+  .steps-list li {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 16px;
+    padding: 22px 0;
+    border-top: 1px solid var(--line);
+  }
+  .steps-list li:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+  .steps-list__n {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    line-height: 1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .steps-list p {
+    margin: 0;
+    color: var(--ink-2);
+  }
+  .two-col {
+    display: grid;
+    gap: clamp(32px, 5vw, 64px);
+  }
+  @media (min-width: 900px) {
+    .two-col {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+  }
+  .two-col h2 {
+    font-size: var(--step-2);
+  }
+  .calc {
+    margin: 0 0 24px;
+  }
+  .calc div {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .calc dt {
+    font-weight: 700;
+  }
+  .calc dd {
+    margin: 0;
+    color: var(--ink-2);
+  }
+  .wood-prices {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: 320px;
+  }
+  .wood-prices li {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .example-calc {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: clamp(18px, 3vw, 28px);
+  }
+  .example-calc__what {
+    color: var(--ink-2);
+    font-size: 0.95rem;
+  }
+  .example-calc .small {
+    display: block;
+    font-weight: 400;
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+  .example-calc .total th,
+  .example-calc .total td {
+    font-weight: 800;
+    font-size: 1.1rem;
+    border-bottom: 0;
+  }
+  .example-calc .btn {
+    margin-top: 18px;
+  }
+</style>

@@ -1,0 +1,105 @@
+---
+import { withBase } from '../lib/paths.ts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { FAQ } from '../data/faq.ts';
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ.flatMap((g) => g.items).map((it) => ({
+    '@type': 'Question',
+    name: it.q,
+    acceptedAnswer: { '@type': 'Answer', text: it.a },
+  })),
+};
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+---
+
+<BaseLayout
+  title="Frequently asked questions"
+  description="Answers about the 3D configurator, prices, wood and finishes, lead times, delivery within Germany and payment at Faserlauf. Demo project."
+  ogImage="/generated/og/faq.jpg"
+  jsonLd={[faqLd]}
+>
+  <header class="page-head">
+    <div class="wrap">
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'FAQ' }]} />
+      <p class="eyebrow">Questions we hear often</p>
+      <h1>FAQ</h1>
+      <p class="lead">Not answered here? <a href={withBase('/contact/')}>Write to us</a> or call; we usually reply the same working day.</p>
+    </div>
+  </header>
+  <div class="wrap faq">
+    {
+      FAQ.map((g) => (
+        <section class="faq__group" aria-labelledby={slug(g.title)}>
+          <h2 id={slug(g.title)}>{g.title}</h2>
+          {g.items.map((it) => (
+            <details class="faq__item">
+              <summary>
+                <span>{it.q}</span>
+              </summary>
+              <p>{it.a}</p>
+            </details>
+          ))}
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .faq {
+    padding-block: clamp(32px, 5vw, 56px) var(--section);
+    max-width: 860px;
+    margin-inline: auto;
+  }
+  .faq__group + .faq__group {
+    margin-top: 48px;
+  }
+  .faq__group h2 {
+    font-size: var(--step-2);
+  }
+  .faq__item {
+    border-bottom: 1px solid var(--line);
+  }
+  .faq__item:first-of-type {
+    border-top: 1px solid var(--line);
+  }
+  .faq__item summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    min-height: 56px;
+    padding: 12px 0;
+    cursor: pointer;
+    font-weight: 650;
+    font-size: 1.05rem;
+    list-style: none;
+  }
+  .faq__item summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq__item summary::after {
+    content: '+';
+    flex: none;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 50%;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .faq__item[open] summary::after {
+    content: '−';
+  }
+  .faq__item p {
+    color: var(--ink-2);
+    margin: 0 0 18px;
+    max-width: 70ch;
+  }
+</style>
