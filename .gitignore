@@ -7,7 +7,7 @@ dist-pages/
 .astro/
 
 # Local data written by the server (quote requests, messages)
-data/
+/data/
 
 # Environment (keep the example)
 .env
